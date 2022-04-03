@@ -2,6 +2,7 @@
 #include <string>
 #include "defs.h"
 #include "Eigen/Core"
+#include <opencv2/opencv.hpp>
 
 //HandlingEigenMatrix
 void Sample1_EMatHandle()
@@ -54,15 +55,60 @@ void Sample1_EMatHandle()
     delete[] dst;
 }
 
-//Test 2D-UnitalyDCT for SquareInput
+//Test Generate DictionaryImage 2D-UnitalyDCT
+void Sample2_GenUni2DDCT_Sq()
+{
+    std::string INPUT_FILE = "";
+    std::string OUTPUT_FOLDER = "D:\\test\\dctRes\\dict\\cos64";
+    size_t basis_size = 64;
+    //cv::Mat src = cv::imread(INPUT_FILE,CV_8U);
+    //int src_w = src.cols;
+    //int src_h = src.rows;
+
+    DCTSqDictionary* cdict = new DCTSqDictionary(basis_size);
+
+    cv::Mat tmp = cv::Mat::zeros(cv::Size(basis_size,basis_size),CV_8U);
+
+    int idx_dict = 0;
+    int idx_img = 0;
+    std::string sname = "";
+    float cur_val = 0.0f;
+    unsigned char v = 0;
+    for(int kx = 0; kx < basis_size; kx++)
+    {
+        for (int ky = 0; ky < basis_size; ky++)
+        {
+            idx_dict = basis_size * kx + ky;
+            std::cout << idx_dict << std::endl;
+            sname = OUTPUT_FOLDER + "\\Basis_Cos_" + std::to_string(ky) + "_" + std::to_string(kx) + ".bmp";
+            for (int c = 0; c < basis_size; c++)
+            {
+                for (int r = 0; r < basis_size; r++)
+                {
+                    idx_img = c * basis_size + r;
+                    cur_val = cdict->m_vterm.at(idx_dict)(r, c) + 1.0;
+                    tmp.data[idx_img] = (unsigned char)(127 * cur_val);
+                }
+            }
+            cv::imwrite(sname, tmp);
+        }
+    }
+
+    delete cdict;
+}
+
+//Test Proc 2D-UnitalyDCT
 void Sample2_Uni2DDCT_Sq()
 {
-    
+    std::string fpath = "D:\\test\\SW20220403\\exp\\20220404004837\\tmp\\crop\\crp_0000.jpg";
+    cv::Mat in = cv::imread(fpath, CV_8U);
+    EMatXf out = Eigen::MatrixXf::Zero(in.rows, in.cols);
+    CMat2EMat(out, in);
 }
 
 //MainProc
 int main()
 {
-    Sample1_EMatHandle();
+    Sample2_Uni2DDCT_Sq();
     return 0;
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "Eigen/Core"
+#include <opencv2/opencv.hpp>
 #include <vector>
 #include <string>
 #include "math.h"
@@ -69,6 +70,69 @@ bool EMat2Arr(
     return bret;
 }
 
+bool CMat2EMat(
+    EMatXf& dst,
+    const cv::Mat& src
+)
+{
+    bool bret = true;
+    bool bExec = false;
+    bExec = ((src.cols==dst.cols()) && (src.rows==dst.rows())) ? true : false;
+    if(bExec)
+    {
+        size_t cur_idx = 0;
+        for (size_t c = 0; c < src.cols; c++)
+        {
+            for (size_t r = 0; r < src.rows; r++)
+            {
+                cur_idx = r * src.cols + c;
+                dst(r, c) = (float)src.data[cur_idx];
+            }
+        }
+
+#ifdef _DEBUG
+        int y = 3;
+        int x = 2;
+        std::cout << dst(y, x) << std::endl;
+        std::cout << (int)src.at<unsigned char>(y,x) << std::endl;
+        std::cout << dst(x, y) << std::endl;
+        std::cout << (int)src.at<unsigned char>(x, y) << std::endl;
+#endif
+    }
+    else
+    {
+        bret = false;
+    }
+    return bret;
+}
+
+bool EMat2CMat(
+    cv::Mat& dst,
+    const EMatXf& src
+)
+{
+    bool bret = true;
+    bool bExec = false;
+    bExec = ((src.cols() == dst.cols) && (src.rows() == dst.rows)) ? true : false;
+    if (bExec)
+    {
+        size_t cur_idx = 0;
+        for (size_t c = 0; c < src.cols(); c++)
+        {
+            for (size_t r = 0; r < src.rows(); r++)
+            {
+                cur_idx = r * src.cols() + c;
+                dst.data[cur_idx] = (unsigned char)(src(r,c));
+            }
+        }
+    }
+    else
+    {
+        bret = false;
+    }
+    return bret;
+}
+
 bool EMatOperate(Eigen::MatrixXf& dst, const Eigen::MatrixXf& src)
 {
     bool bret = true;
@@ -105,17 +169,17 @@ public:
     {
         const double pi = 3.141592653589793238463;
         // Dim^4
-        for(int kx =0;kx<m_size;kx++)
+        for(int kx =0;kx<sqsize;kx++)
         {
-            for (int ky = 0; ky < m_size; ky++)
+            for (int ky = 0; ky < sqsize; ky++)
             {
                 //Gen 1 Basis
-                EMatXf cur_img(m_size, m_size);
-                for (int c = 0; c < m_size; c++)
+                EMatXf cur_img(sqsize, sqsize);
+                for (int c = 0; c < sqsize; c++)
                 {
-                    for (int r = 0; r < m_size; r++)
+                    for (int r = 0; r < sqsize; r++)
                     {
-                        cur_img(r, c) = (float)(std::cos((2 * c + 1) * kx * pi / (2 * m_size)) * std::cos((2 * r + 1) * ky * pi / (2 * m_size)));
+                        cur_img(r, c) = (float)(std::cos((2 * r + 1) * kx * pi / (2 * sqsize)) * std::cos((2 * c + 1) * ky * pi / (2 * sqsize)));
                     }
                 }
                 m_vterm.push_back(cur_img);
@@ -150,23 +214,35 @@ bool UnitaryDCT2DSq(EMatXf& dst,const EMatXf& src)
 {
     bool bret = true;
     bool bExec = false;
+    const double pi = 3.141592653589793238463;
     size_t rows = src.rows();
     size_t cols = src.cols();
-    if((rows==dst.rows())&&(cols==dst.cols())&&(cols==rows))
+
+    //Judge Executable
+    if((rows==dst.rows())&&(cols==dst.cols())&&(cols==rows)&&(cols != 0))
     {
         bExec = true;
     }
 
+    //Execute
     if(bExec)
     {
         EMatXf e_conv = Eigen::MatrixXf::Zero(rows,cols);
-        //TODO
-
-
-
+        float coef = 0.0;
+        for (size_t c = 0; c < cols; c++)
+        {
+            for (size_t r = 0; r < rows; r++)
+            {
+                coef = (r == 0) ? 1.0 : 2.0;
+                e_conv(r, c) = coef * (float)std::cos((2 * c + 1) * r * pi / (2 * rows)) / std::sqrt(rows);
+            }
+        }
         dst = e_conv * src * e_conv.transpose(); //UnitaryTransform for Signal Matrix(Z = RXR^T)
     }
-    
+    else
+    {
+        bret = false;
+    }
 
     return bret;
 }
