@@ -100,15 +100,30 @@ void Sample2_GenUni2DDCT_Sq()
 //Test Proc 2D-UnitalyDCT
 void Sample2_Uni2DDCT_Sq()
 {
-    std::string fpath = "D:\\test\\SW20220403\\exp\\20220404004837\\tmp\\crop\\crp_0000.jpg";
+    std::string fpath = "D:\\test\\SW20220403\\exp\\20220404005029\\tmp\\crop\\crp_0000.jpg";
     cv::Mat in = cv::imread(fpath, CV_8U);
-    EMatXf out = Eigen::MatrixXf::Zero(in.rows, in.cols);
-    CMat2EMat(out, in);
+    EMatXf e_in = Eigen::MatrixXf::Zero(in.rows, in.cols);
+    CMat2EMat(e_in, in);
+    
+    EMatXf e_out = Eigen::MatrixXf::Zero(in.rows, in.cols);
+    UnitaryDCT2DSq(e_out,e_in);
+
+    cv::Mat out = cv::Mat::zeros(cv::Size(in.rows, in.cols), CV_8U);
+    EMat2CMat(out,e_out,true);
+    fpath = "D:\\test\\SW20220403\\exp\\20220404005029\\tmp\\glcm\\crp_0000_dct.bmp";
+    cv::imwrite(fpath, out);
+}
+
+//Test Op Conjugate Gradient Method
+void Sample3_CGMethod()
+{
+    size_t dim = 2;
+
 }
 
 //MainProc
 int main()
 {
-    Sample2_Uni2DDCT_Sq();
+    Sample3_CGMethod();
     return 0;
 }

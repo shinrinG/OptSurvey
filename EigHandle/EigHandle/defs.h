@@ -106,9 +106,16 @@ bool CMat2EMat(
     return bret;
 }
 
+
+unsigned char scaleFunc(float fin)
+{
+    return (unsigned char)((fin + 255.0) / 2);
+}
+
 bool EMat2CMat(
     cv::Mat& dst,
-    const EMatXf& src
+    const EMatXf& src,
+    bool bEnableScale
 )
 {
     bool bret = true;
@@ -117,12 +124,13 @@ bool EMat2CMat(
     if (bExec)
     {
         size_t cur_idx = 0;
+        float mul = bEnableScale ? 255.0f : 1.0f;
         for (size_t c = 0; c < src.cols(); c++)
         {
             for (size_t r = 0; r < src.rows(); r++)
             {
                 cur_idx = r * src.cols() + c;
-                dst.data[cur_idx] = (unsigned char)(src(r,c));
+                dst.data[cur_idx] = bEnableScale? scaleFunc(src(r, c)):(unsigned char)(src(r,c));
             }
         }
     }
@@ -234,15 +242,47 @@ bool UnitaryDCT2DSq(EMatXf& dst,const EMatXf& src)
             for (size_t r = 0; r < rows; r++)
             {
                 coef = (r == 0) ? 1.0 : 2.0;
-                e_conv(r, c) = coef * (float)std::cos((2 * c + 1) * r * pi / (2 * rows)) / std::sqrt(rows);
+                e_conv(r, c) = std::sqrt(coef) * (float)std::cos((2 * c + 1) * r * pi / (2 * rows)) / std::sqrt(rows);
             }
         }
-        dst = e_conv * src * e_conv.transpose(); //UnitaryTransform for Signal Matrix(Z = RXR^T)
+        EMatXf e_conv_t = e_conv.transpose();
+        dst = e_conv * src * e_conv_t; //UnitaryTransform for Signal Matrix(Z = RXR^T)
     }
     else
     {
         bret = false;
     }
+
+    return bret;
+}
+
+
+int objectiveFunc1(float res, const EVecXf& src)
+{
+    int ret = 0;
+    size_t dim = 2;
+    if(src.rows()==2)
+    {
+        res = 4 * std::pow(src(0)-2,2) + 3 * std::pow(src(1)-9,2);
+    }
+    else
+    {
+        res = -1.0f;
+        ret = 1;
+    }
+    return ret;
+}
+
+bool LineSearch(
+    EVecXf& res,
+    const size_t dim,
+    const EVecXf& norm_direction,
+    int(*ofunc(float,const EVecXf&)),
+    const float eps = 0.0001f
+)
+{
+    bool bret = false;
+    EVecXf cur_x = EVecXf::Zero(dim);
 
     return bret;
 }
