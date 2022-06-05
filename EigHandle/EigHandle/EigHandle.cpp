@@ -3,6 +3,7 @@
 #include "defs.h"
 #include "Eigen/Core"
 #include <opencv2/opencv.hpp>
+#include "sample31_deblur.h"
 
 //HandlingEigenMatrix
 void Sample1_EMatHandle()
@@ -118,12 +119,19 @@ void Sample2_Uni2DDCT_Sq()
 void Sample3_CGMethod()
 {
     size_t dim = 2;
+    //Deplicate
+}
+
+//SampleForSModeling is S3X
+
+void call_sample31_deblur()
+{
 
 }
 
 //MainProc
 int main()
 {
-    Sample3_CGMethod();
+    call_sample31_deblur();
     return 0;
 }

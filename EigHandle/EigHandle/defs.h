@@ -7,6 +7,7 @@
 
 typedef Eigen::MatrixXf EMatXf;
 typedef Eigen::VectorXf EVecXf;
+typedef unsigned char uchar;
 
 bool Arr2EMat(
     EMatXf& dst,
