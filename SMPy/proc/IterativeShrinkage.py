@@ -1,47 +1,51 @@
 import numpy as np
 from scipy.optimize import minimize_scalar, minimize
 from scipy.signal import convolve2d
+from utils.func import get_blur_kernel_norm
 
+#Algorithm of Iterative Shrinkage
 class IterativeShrinkage(object):
-    """ 反復縮小アルゴリズム """
+    #Construction
     def __init__(self, b, s, lam):
         self.b = b
         self.eps = 0
         self.s = s
         self.lam = lam
         self.c = 1.
-       
+        self.kernel = get_blur_kernel_norm()
+    
+    #wavelet H
     def horizontal(self, im):
-        """ 水平方向にフィルタリング """
         im2 = np.roll(im, 1, axis=1)
         return (im + im2) / 2., (im - im2) / 2.
 
+    #wavelet V
     def vertical(self, im):
-        """ 垂直方向にフィルタリング """
         im2 = np.roll(im, 1, axis=0)
         return (im + im2) / 2., (im - im2) / 2.
-
+    
+    #wavelet Lv1
     def wavelet(self, im):
-        """ レベル1（非縮小）ウェーブレット変換 """
         l, h = self.horizontal(im)
         hl, hh = self.vertical(h)
         ll, lh = self.vertical(l)
         return ll, lh, hl, hh
-
+    
+    #wavelet Lv2
     def wavelet2(self, im):
-        """ レベル2（非縮小）ウェーブレット変換 """
         ll, lh, hl, hh = self.wavelet(im)
         ll2, lh2, hl2, hh2 = self.wavelet(ll)
         return np.array([ll2, lh2, hl2, hh2, lh, hl, hh])
 
     def forward(self, x):
         """ 順投影 """
-        return convolve2d(np.sum(x, axis=0), h, mode='same', boundary='symm')  
+        return convolve2d(np.sum(x, axis=0), self.kernel, mode='same', boundary='symm')  
 
     def backward(self, y):
         """ 逆投影 """
-        return self.wavelet2(convolve2d(y, h, mode='same', boundary='symm'))
+        return self.wavelet2(convolve2d(y, self.kernel, mode='same', boundary='symm'))
 
+    #Shrink
     def shrink(self, x):
         """ 縮小 """
         s, lam = self.s, self.lam
@@ -51,10 +55,12 @@ class IterativeShrinkage(object):
         x[ndx] *= -1
         return x
 
+    #
     def rho(self, x):
         """ 関数ρ(x) """
         return np.abs(x) + self.s * np.log(1. + np.abs(x) / self.s)
     
+    #Objective function
     def f(self, x, y):
         """ 目標関数 """
         return self.lam * np.sum(self.rho(x)) + 0.5 * np.sum((self.b - y) ** 2)
