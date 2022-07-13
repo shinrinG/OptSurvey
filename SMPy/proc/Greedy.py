@@ -1,5 +1,7 @@
 import numpy as np
-
+"""
+ref : https://github.com/kibo35/sparse-modeling
+"""
 class Greedy(object):
     """ 貪欲法 """
     def __init__(self, A, b, eps=1e-4):

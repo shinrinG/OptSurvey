@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib.pyplot as plt 
+from scipy.fftpack import dct, idct
+import pywt
 
 #Get Squared Error
 def get_se(x, x2):
@@ -36,3 +39,28 @@ def get_blur_kernel_norm():
     h = get_blur_kernel()
     h /=h.sum()
     return h
+
+#Show Dict
+def show_dictionary(A, name=None):
+    n = int(np.sqrt(A.shape[0]))
+    m = int(np.sqrt(A.shape[1]))
+    A_show = A.reshape((n, n, m, m))
+    fig, ax = plt.subplots(m, m, figsize=(4, 4))
+    for row in range(m):
+        for col in range(m):
+            ax[row, col].imshow(A_show[:, :, col, row], cmap='gray', interpolation='Nearest')
+            ax[row, col].axis('off')
+    if name is not None:
+        plt.savefig(name, dpi=220)
+
+#get psnr
+def get_psnr(im, recon):
+    return 10. * np.log(im.max() / np.sqrt(np.mean((im - recon) ** 2)))
+
+#get 2D dct
+def get_2D_dct(img):
+    return dct(dct(img.T, norm='ortho').T, norm='ortho')
+
+#get 2D idct
+def get_2d_idct(coeffs):
+    return idct(idct(coeffs.T, norm='ortho').T, norm='ortho')

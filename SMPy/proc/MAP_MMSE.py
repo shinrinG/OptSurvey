@@ -1,6 +1,8 @@
 from itertools import combinations
 import numpy as np
-
+"""
+ref : https://github.com/kibo35/sparse-modeling
+"""
 class MAP_MMSE(object):
     """ MAP推定 """
     def __init__(self, nr):

@@ -2,7 +2,9 @@ import numpy as np
 from scipy.optimize import minimize_scalar, minimize
 from scipy.signal import convolve2d
 from utils.func import get_blur_kernel_norm
-
+"""
+ref : https://github.com/kibo35/sparse-modeling
+"""
 #Algorithm of Iterative Shrinkage
 class IterativeShrinkage(object):
     #Construction

@@ -1,7 +1,9 @@
 import numpy as np
 from utils.omp import OMP
-
-class DctionaryLearning(object):    
+"""
+ref : https://github.com/kibo35/sparse-modeling
+"""
+class DictionaryLearning(object):
     """ 辞書学習 """         
     def MOD(self, Y, sig, m, k0, n_iter=50, A0=None, initial_dictionary=None):
         """ 

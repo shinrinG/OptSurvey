@@ -1,13 +1,13 @@
 import numpy as np
+
+""" 
+直交マッチング追跡(orthogonal matching pursuit; OMP)     
+A : dictionary (nxm)
+b : observed (n)
+k0 : support of x
+eps : threshold of error
+"""
 def OMP(A, b, k0, eps):
-    """ 
-    直交マッチング追跡(orthogonal matching pursuit; OMP) 
-    
-    A nxm行列
-    b n要素の観測
-    k0 xの非ゼロの要素数
-    eps 誤差の閾値
-    """
     # 初期化
     x = np.zeros(A.shape[1])
     S = np.zeros(A.shape[1], dtype=np.uint8)
